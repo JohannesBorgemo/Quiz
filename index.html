@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>Religionstest – Etik & Livsfrågor (5 profiler)</title>
+  <title>Religionstest – Etik, Existens & Rit/Livsstil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root { --maxw: 860px; --radius: 12px; }
@@ -16,6 +16,8 @@
     .btn { width:100%; text-align:left; background:#fff; border:1px solid #ddd; border-radius:10px;
            padding:12px 14px; cursor:pointer; transition: background .15s, transform .02s; }
     .btn:hover { background:#f2f2f2; } .btn:active{ transform: scale(0.995); }
+    .hidden-label { font-size: 0.85rem; color: #777; margin-top: 4px; display: none; }
+    .show-labels .hidden-label { display: block; }
     .progress-wrap { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
     .progress { flex:1; height:10px; background:#eee; border-radius:999px; overflow:hidden; }
     .progress > span { display:block; height:100%; width:0%; background:#333; transition: width .25s; }
@@ -31,8 +33,8 @@
   </style>
 </head>
 <body>
-  <h1>Religionstest – Etik & Livsfrågor</h1>
-  <p class="sub">Välj det alternativ som bäst stämmer med hur du skulle göra/tänka. I slutet får du en texttolkning och procentuell fördelning.</p>
+  <h1>Religionstest – Etik, Existens & Rit/Livsstil</h1>
+  <p class="sub">Välj det alternativ som bäst stämmer med hur du skulle göra/tänka. I slutet får du en texttolkning och en procentuell fördelning.</p>
 
   <div class="card">
     <div class="progress-wrap">
@@ -59,141 +61,147 @@
   </div>
 
   <script>
-    // Profiler: A=Kristendom, B=Buddhism, C=Judendom, D=Hinduism, E=Islam
+    // Profiler (etiketter används i lärarläge + resultat)
+    const labels = { A:"Kristendom", B:"Buddhism", C:"Judendom", D:"Hinduism", E:"Islam" };
+
     const descriptions = {
-      A: "Kristen etik: betoning på kärlek till nästan, förlåtelse och omsorg – att göra gott i praktiken.",
-      B: "Buddhistisk etik: balans och icke-skadande; att inte dras med i ilska/begär och att odla sinnesro.",
-      C: "Judisk etik: regler och ansvar med stark omtanke om liv och situation; gemenskap, eftertanke och samvetsprövning.",
-      D: "Hinduisk etik: livet som helhetlig väg; handlingars följder över tid och inre fördjupning/stillhet.",
-      E: "Islamisk etik: plikt, tydliga ramar och rättvisa; avsikt och disciplin i vardagens beslut."
+      A: "Kristen etik: kärlek till nästan, förlåtelse och omsorg i praktiken.",
+      B: "Buddhistisk etik: balans och icke-skadande; att inte dras med i ilska eller begär.",
+      C: "Judisk etik: regler och ansvar kombinerat med samvetsprövning och gemenskap.",
+      D: "Hinduisk etik: livet som en helhetlig väg; handlingars följder över tid och inre fördjupning.",
+      E: "Islamisk etik: plikt, rättvisa och tydliga ramar; avsikt och disciplin i vardagen."
     };
 
-    // 20 frågor – alternativ kan ge poäng till flera profiler
+    // 20 frågor – Etik (1–5), Existens (6–10), Rit/Livsstil (11–20)
     const questions = [
-      // Etiska vardagsval
-      { q: "1. Du ser en klasskompis bli retad. Vad gör du?",
+      // --- Etik ---
+      { q: "1. Du ser en klasskompis bli retad i korridoren. Vad gör du?",
         options: [
-          { text: "Ingriper och står upp för personen, även om det kostar dig.", scores: ["A","E"] },
-          { text: "Försöker lugna alla och stoppa skadan utan att peka ut någon.", scores: ["B","D"] },
-          { text: "Söker en vuxen/regelväg och dokumenterar vad som hänt.", scores: ["C","E"] }
+          { text: "Ingriper och står upp för personen där och då.", scores: ["A","E"] },
+          { text: "Försöker lugna alla och styra undan från mer skada.", scores: ["B","D"] },
+          { text: "Hämtar en vuxen och följer skolans rutiner.", scores: ["C","E"] }
         ]},
-      { q: "2. En vän har fuskat på provet och vill att du håller tyst.",
+      { q: "2. En vän har fuskat på provet och ber dig vara tyst.",
         options: [
-          { text: "Säger ifrån – det som är fel ska rättas, men med respekt för personen.", scores: ["C","E","A"] },
-          { text: "Talar med vännen privat för att minska skadan utan att eskalera.", scores: ["B","D"] }
+          { text: "Säger ifrån – fel ska rättas, men med respekt för personen.", scores: ["C","E","A"] },
+          { text: "Pratar privat för att få vännen att rätta till utan bråk.", scores: ["B","D"] }
         ]},
-      { q: "3. Du hittar pengar på skolans golv.",
+      { q: "3. Du hittar en plånbok med kontanter i uppehållsrummet.",
         options: [
-          { text: "Lämnar in dem direkt.", scores: ["A","E"] },
-          { text: "Frågar runt och försöker återföra till rätt person.", scores: ["C","A"] },
-          { text: "Låter bli att ta dem – känner att konsekvenser fastnar vid en.", scores: ["B","D"] }
+          { text: "Lämnar in den direkt till expeditionen.", scores: ["A","E"] },
+          { text: "Letar upp ägaren om du kan, annars lämnar in den.", scores: ["C","A"] },
+          { text: "Rör den inte – vill inte bära följderna av fel beslut.", scores: ["B","D"] }
         ]},
-      { q: "4. En kollega skyller på dig för något du inte gjort.",
+      { q: "4. En kollega skyller på dig inför gruppen för något du inte gjort.",
         options: [
-          { text: "Tar upp det sakligt och tydligt – rätt ska vara rätt.", scores: ["C","E"] },
-          { text: "Markerar men lämnar utrymme för förlåtelse och fortsatt relation.", scores: ["A"] },
-          { text: "Backar ett steg för att inte spä på konflikt, avvaktar och iakttar.", scores: ["B","D"] }
+          { text: "Säger ifrån sakligt inför gruppen – rätt ska vara rätt.", scores: ["C","E"] },
+          { text: "Markerar tydligt men visar vilja till försoning.", scores: ["A"] },
+          { text: "Backar för stunden för att undvika konflikt, tar det senare.", scores: ["B","D"] }
         ]},
-      { q: "5. En vän ber dig ljuga för att skydda honom/henne.",
+      { q: "5. En vän vill att du ljuger för att skydda hen i en känslig situation.",
         options: [
           { text: "Avböjer – sanning och ansvar går före.", scores: ["C","E","A"] },
-          { text: "Söker en utväg som minskar lidandet utan att behöva ljuga.", scores: ["B","D","A"] }
-        ]},
-      { q: "6. Någon glöms bort i grupparbetet.",
-        options: [
-          { text: "Inkluderar aktivt – alla har lika värde och ska få plats.", scores: ["A","C"] },
-          { text: "Medlar så att gruppen hittar balans och ingen tappar ansiktet.", scores: ["B","D"] }
-        ]},
-      { q: "7. Någon tränger sig i kön.",
-        options: [
-          { text: "Säger till sakligt – ordningen gäller alla.", scores: ["E","C"] },
-          { text: "Låter det passera och tränar tålamod.", scores: ["B","D"] },
-          { text: "Pekar på beteendet men erbjuder en vänlig utväg.", scores: ["A"] }
-        ]},
-      { q: "8. Du erbjuds sommarjobb på ett företag med dåligt rykte.",
-        options: [
-          { text: "Tackar nej – integritet och rättvisa går före lön.", scores: ["A","C","E"] },
-          { text: "Avstår om du ser att det skadar andra på sikt.", scores: ["D","B"] }
-        ]},
-      { q: "9. Du får oväntat mycket pengar.",
-        options: [
-          { text: "Ger en del till behövande.", scores: ["A","E"] },
-          { text: "Delar med familjen och närmaste kretsen först.", scores: ["C"] },
-          { text: "Använder för något långsiktigt meningsfullt.", scores: ["D"] },
-          { text: "Sparar och planerar i lugn takt.", scores: ["B"] }
-        ]},
-      { q: "10. En regel står i vägen för vad du tycker blir mest rätt i en situation.",
-        options: [
-          { text: "Följer regeln – ramar behövs för rättvisa och ordning.", scores: ["E"] },
-          { text: "Tolkar regeln genom omtanke om liv/situation och gör undantag vid behov.", scores: ["C","A"] },
-          { text: "Söker en balanserad lösning som minimerar skada.", scores: ["B"] },
-          { text: "Följer det som stämmer med en djupare mening för helheten.", scores: ["D"] }
+          { text: "Söker en lösning som minskar lidande utan att ljuga.", scores: ["B","D"] }
         ]},
 
-      // Existentiella & livsval
-      { q: "11. Du går igenom en svår tid.",
+      // --- Existens ---
+      { q: "6. Du går igenom en längre period av motgångar. Hur ser du på det?",
         options: [
-          { text: "Ser det som en prövning som kräver uthållighet och disciplin.", scores: ["E"] },
-          { text: "Ser det som något att förstå och växa av.", scores: ["B"] },
-          { text: "Söker tröst och mening i omtanke och gemenskap.", scores: ["A"] },
-          { text: "Ser det som del av en större livsväg över tid.", scores: ["D"] },
-          { text: "Rådgör, väger bud och konsekvenser, och väljer varsamt väg.", scores: ["C"] }
+          { text: "Som en prövning som kräver uthållighet och disciplin.", scores: ["E"] },
+          { text: "Som något att förstå och växa av på sikt.", scores: ["B"] },
+          { text: "Som något där gemenskap och omsorg ger mening.", scores: ["A"] },
+          { text: "Som en del av en större livsväg över tid.", scores: ["D"] },
+          { text: "Som ett läge för samvetsprövning och kloka val.", scores: ["C"] }
         ]},
-      { q: "12. Någon behandlar dig illa.",
+      { q: "7. Någon behandlar dig illa. Vad blir ditt första val?",
         options: [
-          { text: "Markerar tydligt och söker upprättelse på rätt sätt.", scores: ["C","E"] },
+          { text: "Söker rättvis upprättelse på ett ordnat sätt.", scores: ["C","E"] },
           { text: "Förlåter och försöker återupprätta relationen.", scores: ["A"] },
-          { text: "Tar avstånd för att undvika mer lidande och låter tiden verka.", scores: ["B","D"] }
+          { text: "Tar avstånd för att undvika mer skada och bråk.", scores: ["B","D"] }
         ]},
-      { q: "13. Du ser orättvisor i världen.",
+      { q: "8. Du ser en tydlig orättvisa i samhället. Vad gör du?",
         options: [
           { text: "Agerar inom tydliga ramar för att främja rättvisa för fler.", scores: ["E","C"] },
-          { text: "Gör konsekvent små goda handlingar i vardagen.", scores: ["B","A"] },
+          { text: "Gör konsekventa små goda handlingar i vardagen.", scores: ["B","A"] },
           { text: "Arbetar långsiktigt utifrån en helhetssyn.", scores: ["D"] }
         ]},
-      { q: "14. Du funderar på döden.",
+      { q: "9. Du funderar på vad som händer efter döden. Vad ligger närmast?",
         options: [
-          { text: "Tänker på ett kommande liv bortom detta.", scores: ["A","E"] },
-          { text: "Tänker på återfödelse och cykler.", scores: ["B","D"] },
-          { text: "Fokuserar främst på livet här och nu och hur vi lever det väl.", scores: ["C"] }
+          { text: "Ett kommande liv bortom detta.", scores: ["A","E"] },
+          { text: "Återfödelse och cykler.", scores: ["B","D"] },
+          { text: "Fokusera på livet här och nu och hur vi lever det väl.", scores: ["C"] }
         ]},
-      { q: "15. Vad är människans innersta natur?",
+      { q: "10. Hur beskriver du människans innersta natur?",
         options: [
           { text: "I grunden god men behöver vägledning och förlåtelse.", scores: ["A"] },
           { text: "Formbar – begär kan övervinnas genom träning och insikt.", scores: ["B"] },
-          { text: "Bunden till ansvar och bud – behöver vägledas av lag och samvete.", scores: ["C","E"] },
-          { text: "En del av något större, med en inre kärna som kan fördjupas.", scores: ["D"] }
+          { text: "Bunden till ansvar och bud; vägleds av lag och samvete.", scores: ["C","E"] },
+          { text: "En del av något större; en inre kärna kan fördjupas.", scores: ["D"] }
         ]},
-      { q: "16. Du ser att naturen far illa.",
+
+      // --- Rit & livsstil ---
+      { q: "11. Du bjuds på fest samma dag som du brukar hålla helig vilodag.",
         options: [
-          { text: "Tar ansvar praktiskt – vi ska vårda och skydda.", scores: ["A","E"] },
-          { text: "Följer regler och rättvisa kring resurser.", scores: ["C"] },
-          { text: "Lever enklare för att minska lidande och begär.", scores: ["B"] },
-          { text: "Visar vördnad – ser naturen som hel och sammanlänkad.", scores: ["D"] }
+          { text: "Avstår – helgdagen går först.", scores: ["C","E"] },
+          { text: "Deltar en kort stund men lämnar i tid.", scores: ["A"] },
+          { text: "Väljer stillhet och egen praxis den dagen.", scores: ["B","D"] }
         ]},
-      { q: "17. En släkting vill att du följer en tradition du inte känner dig hemma i.",
+      { q: "12. Du blir bjuden på mat som inte följer dina vanor/restriktioner.",
+        options: [
+          { text: "Avstår om det bryter mot viktiga regler.", scores: ["C","E"] },
+          { text: "Äter lite för att visa gemenskap och omtanke.", scores: ["A"] },
+          { text: "Väljer balans – maten är sekundär till sinnesro.", scores: ["B","D"] }
+        ]},
+      { q: "13. En släkting vill att du deltar i en tradition du inte känner dig hemma i.",
         options: [
           { text: "Deltar för gemenskapens skull – relationen är viktig.", scores: ["A"] },
-          { text: "Deltar om du kan göra det inom tydliga ramar du kan stå för.", scores: ["E"] },
-          { text: "Avstår om det strider mot din samvetsmässiga tolkning.", scores: ["C"] },
-          { text: "Deltar delvis på ett sätt som känns sant och stilla för dig.", scores: ["D","B"] }
+          { text: "Avstår om samvetet säger nej.", scores: ["C"] },
+          { text: "Deltar om det kan ske inom ramar du kan stå för.", scores: ["E"] },
+          { text: "Deltar delvis på ett sätt som känns sant och stilla.", scores: ["B","D"] }
         ]},
-      { q: "18. Du måste välja mellan kortsiktig lycka och långsiktig mening.",
+      { q: "14. Varför fastar/avstår du (om du gör det)?",
         options: [
-          { text: "Väljer mening och ansvar, även om det kostar nu.", scores: ["A","E","C","D"] },
-          { text: "Väljer balans och minskat lidande här och nu.", scores: ["B"] }
+          { text: "Disciplin och lydnad stärker mig.", scores: ["E"] },
+          { text: "För att minnas och respektera traditionen och dess vishet.", scores: ["C"] },
+          { text: "För att öva tålamod och balans i livet.", scores: ["B","D"] },
+          { text: "För att påminnas om andras behov och visa omsorg.", scores: ["A"] }
         ]},
-      { q: "19. Du blir sviken av en nära vän.",
+      { q: "15. Du ska ge en gåva/bidrag. Vad prioriterar du?",
         options: [
-          { text: "Förlåter och försöker reparera.", scores: ["A"] },
-          { text: "Söker rättvis upprättelse och tydliga ramar framåt.", scores: ["C","E"] },
-          { text: "Avvaktar och låter tiden klargöra nästa steg.", scores: ["B","D"] }
+          { text: "Välgörenhet och behövande i samhället.", scores: ["A","E"] },
+          { text: "Gemenskapen/föreningen där du hör hemma.", scores: ["C"] },
+          { text: "Något långsiktigt som bygger helhet och mening.", scores: ["D"] },
+          { text: "Att träna bort själviskhet genom givande.", scores: ["B"] }
         ]},
-      { q: "20. Gruppen vill göra något felaktigt.",
+      { q: "16. Någon frågar varför du ber/mediterar.",
         options: [
-          { text: "Står emot, även om du blir ensam.", scores: ["E","C","A"] },
-          { text: "Följer med för att passa in.", scores: [] },
-          { text: "Försöker hitta en tredje väg som minskar skada och bevarar lugn.", scores: ["B","D"] }
+          { text: "För att hålla kontakt och riktning i det heliga.", scores: ["A","E","C"] },
+          { text: "För att träna sinnet i stillhet och insikt.", scores: ["B","D"] }
+        ]},
+      { q: "17. Hur tänker du kring klädsel i skolan/arbetsplatsen?",
+        options: [
+          { text: "Väljer det som visar respekt och blygsamhet.", scores: ["E","C"] },
+          { text: "Uttrycker mig själv men med ansvar och omtanke.", scores: ["A"] },
+          { text: "Väljer enkelt för att inte mata begär/självhävdelse.", scores: ["B","D"] }
+        ]},
+      { q: "18. Hur förhåller du dig till vilodag/helg?",
+        options: [
+          { text: "Vilar enligt bud och ordning.", scores: ["C","E"] },
+          { text: "Vilar för relationer och för att minnas kärleken.", scores: ["A"] },
+          { text: "Vilar som del av balans och harmoni.", scores: ["B","D"] }
+        ]},
+      { q: "19. Vilken aktivitet väljer du för inre styrka?",
+        options: [
+          { text: "Bön i ordnade former, ensam eller tillsammans.", scores: ["E","C"] },
+          { text: "Meditation och tystnad.", scores: ["B","D"] },
+          { text: "Bön och sång/gemenskap.", scores: ["A"] }
+        ]},
+      { q: "20. Du står inför ett viktigt beslut. Vad är din metod?",
+        options: [
+          { text: "Söker råd i bud/texter och följer ramarna.", scores: ["C","E"] },
+          { text: "Lyssnar till hjärtat och är beredd att förlåta felsteg.", scores: ["A"] },
+          { text: "Väljer det som minskar lidande och ökar balans.", scores: ["B"] },
+          { text: "Väljer det som bäst passar livets helhet och riktning.", scores: ["D"] }
         ]}
     ];
 
@@ -219,16 +227,26 @@
       shuffle([...questions[current].options]).forEach(opt=>{
         const btn = document.createElement("button");
         btn.className="btn"; btn.textContent = opt.text;
+
+        // Dold etikett för lärarläge
+        const label = document.createElement("div");
+        label.className = "hidden-label";
+        label.textContent = "➜ " + (opt.scores.map(k=>labels[k]).join(", ") || "Ger inga poäng");
+
+        const box = document.createElement("div");
+        box.appendChild(btn); box.appendChild(label);
+
         btn.onclick = ()=>{
           (opt.scores||[]).forEach(k=>{ if(scores[k]!=null) scores[k]++; });
           current++; updateCounter(); updateProgress(); showQuestion();
         };
-        opts.appendChild(btn);
+        opts.appendChild(box);
       });
       wrap.appendChild(opts); container.appendChild(wrap);
     }
 
     function showResult(){
+      // Byt ut quizet och visa resultatkortet
       document.getElementById("quiz").innerHTML = `<p class="muted">Klart! Se resultatet nedan.</p>`;
       const total = Object.values(scores).reduce((a,b)=>a+b,0)||1;
       const pct = Object.fromEntries(Object.entries(scores).map(([k,v])=>[k, Math.round((v/total)*100)]));
@@ -237,34 +255,32 @@
       const top = Object.keys(scores).filter(k=>scores[k]===maxVal);
 
       // Topptext
-      const labels = {A:"kristen etik",B:"buddhistisk etik",C:"judisk etik",D:"hinduisk etik",E:"islamisk etik"};
       const titleList = top.map(k=>labels[k]).join(" & ");
       document.getElementById("summary").textContent = `Du lutar mest åt: ${titleList}`;
 
       // Fördelningsstaplar
-      const order = ["A","B","C","D","E"];
       const dist = document.getElementById("distribution"); dist.innerHTML="";
-      order.forEach(k=>{
+      ["A","B","C","D","E"].forEach(k=>{
         const row = document.createElement("div"); row.className="dist-row";
         const label = document.createElement("div"); label.textContent = k;
         const bar = document.createElement("div"); bar.className="bar";
         const fill = document.createElement("span"); fill.style.width = pct[k]+"%"; bar.appendChild(fill);
         const val = document.createElement("div"); val.textContent = pct[k]+"%";
-        row.appendChild(label); row.appendChild(bar); row.appendChild(val); dist.appendChild(row);
+        row.appendChild(label); row.appendChild(bar); row.appendChild(val);
+        dist.appendChild(row);
       });
 
-      // Tolkningstext: visa alla topp + kort om övriga
+      // Tolkning: topp-profiler + 1–2 närmast följande
       const interp = document.getElementById("interpretation");
       let lines = [];
-      top.forEach(k=> lines.push(`• ${labels[k][0].toUpperCase()+labels[k].slice(1)}: ${descriptions[k]}`));
-      const others = order.filter(k=>!top.includes(k)).sort((a,b)=>scores[b]-scores[a]).slice(0,2);
+      top.forEach(k => lines.push(`• ${labels[k]}: ${descriptions[k]}`));
+      const others = Object.keys(scores).filter(k=>!top.includes(k)).sort((a,b)=>scores[b]-scores[a]).slice(0,2);
       if(others.length){
         lines.push("<br/>Nära profiler:");
-        others.forEach(k=> lines.push(`• ${labels[k][0].toUpperCase()+labels[k].slice(1)}: ${descriptions[k]}`));
+        others.forEach(k => lines.push(`• ${labels[k]}: ${descriptions[k]}`));
       }
       interp.innerHTML = lines.join("<br/>");
 
-      // Visa kort
       document.getElementById("resultCard").style.display = "block";
       setTimeout(()=>document.getElementById("resultCard").scrollIntoView({behavior:"smooth"}),100);
     }
@@ -275,6 +291,13 @@
       document.getElementById("quiz").innerHTML = "";
       showQuestion(); window.scrollTo({top:0, behavior:"smooth"});
     }
+
+    // Lärarläge: tryck L för att toggla etiketter
+    document.addEventListener("keydown", e=>{
+      if(e.key && e.key.toLowerCase()==="l"){
+        document.body.classList.toggle("show-labels");
+      }
+    });
 
     // Init
     initState(); showQuestion();
