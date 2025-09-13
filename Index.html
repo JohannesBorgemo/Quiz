@@ -1,1 +1,337 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <title>Religionstest – Vardagliga val</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --maxw: 820px;
+      --gap: 16px;
+      --radius: 10px;
+    }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      max-width: var(--maxw);
+      margin: 24px auto;
+      padding: 0 12px;
+      line-height: 1.6;
+    }
+    h1 { margin-bottom: 6px; }
+    .sub { color: #555; margin-top: 0; }
+    .card {
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .question h3 { margin: 0 0 6px 0; }
+    .options { display: grid; gap: 8px; margin-top: 10px; }
+    .btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: transform 0.02s ease-in-out, background 0.15s ease;
+    }
+    .btn:hover { background: #f3f3f3; }
+    .btn:active { transform: scale(0.995); }
+    .progress-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .progress {
+      flex: 1;
+      height: 10px;
+      background: #eee;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: #333;
+      transition: width 0.25s ease;
+    }
+    .kicker { font-size: 0.95rem; color: #444; margin: 0; }
+    .result { font-weight: 600; font-size: 1.15rem; }
+    .grid { display: grid; gap: 10px; }
+    .dist-row { display: grid; grid-template-columns: 50px 1fr 72px; gap: 10px; align-items: center; }
+    .bar {
+      height: 12px;
+      background: #e6e6e6;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar > span { display: block; height: 100%; width: 0%; background: #222; transition: width 0.35s ease; }
+    .top { background: #111; color: #fff; padding: 2px 8px; border-radius: 999px; display: inline-block; font-size: 0.85rem; }
+    .muted { color: #666; }
+    .actions { display: flex; gap: 10px; margin-top: 14px; }
+    .pill {
+      border: 1px solid #ccc; background: #fff; border-radius: 999px; padding: 10px 14px; cursor: pointer;
+    }
+    .pill:hover { background: #f5f5f5; }
+    .footer { color: #666; font-size: 0.92rem; }
+    .small { font-size: 0.9rem; color: #555; }
+    /* Make buttons readable on mobile */
+    @media (max-width: 560px) {
+      .dist-row { grid-template-columns: 42px 1fr 64px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Religionstest – Vardagliga val</h1>
+  <p class="sub">Välj det alternativ som bäst stämmer med hur du hade gjort. I slutet får du en tolkning och en procentuell fördelning.</p>
+
+  <div class="card">
+    <div class="progress-wrap">
+      <p class="kicker"><span id="counter">Fråga 1/10</span></p>
+      <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+    </div>
+    <div id="quiz"></div>
+  </div>
+
+  <div id="resultCard" class="card" style="display:none;">
+    <h2>Ditt resultat</h2>
+    <p id="summary" class="result"></p>
+
+    <h3>Fördelning</h3>
+    <div class="grid" id="distribution"></div>
+
+    <h3>Tolkning</h3>
+    <p id="interpretation"></p>
+
+    <div class="actions">
+      <button class="pill" onclick="restart()">Starta om</button>
+      <button class="pill" onclick="scrollToTop()">Till toppen</button>
+    </div>
+  </div>
+
+  <p class="footer small">
+    Nyckel (subtil): A = kristen etik · B = buddhistiskt präglad balans · C = regelstyrd/rättviseinriktad (islam/judendom) · D = livshelhet/”väg”-orienterat (hinduisk prägel)
+  </p>
+
+  <script>
+    const questions = [
+      { q: "1. Du ser en person som tappar sina matkassar. Vad gör du?",
+        options: [
+          "Hjälper direkt – medkänsla går först (A)",
+          "Tänker: Jag skulle också vilja få hjälp (B)",
+          "Väntar, men ingriper om ingen annan gör (C)",
+          "Ser det som en chans att göra något gott (D)"
+        ]},
+      { q: "2. Du hittar en plånbok med pengar i. Hur agerar du?",
+        options: [
+          "Lämnar tillbaka allt – ärlighet först (A)",
+          "Samvetet skulle plåga mig annars (B)",
+          "Gör det rätta även om ingen ser (C)",
+          "Vet att handlingar ger följder, så lämnar tillbaka (D)"
+        ]},
+      { q: "3. En vän bjuder in dig till fest samma kväll som en högtid du brukar hålla i stillhet.",
+        options: [
+          "Avstår från festen helt (A)",
+          "Besöker festen kort men går hem tidigt (B)",
+          "Håller fast vid min tradition (C)",
+          "Ser festen som en störning, väljer stillhet (D)"
+        ]},
+      { q: "4. Din vän säger att livet känns tomt och meningslöst. Vad gör du?",
+        options: [
+          "Lyssnar och försöker inge hopp (A)",
+          "Uppmuntrar till tålamod – svåra tider kan leda till lärdom (B)",
+          "Påminner om att mörka stunder går över (C)",
+          "Tröstar genom att lyfta människans inneboende värde (D)"
+        ]},
+      { q: "5. En kollega sprider ett rykte om dig. Hur reagerar du?",
+        options: [
+          "Förlåter, men markerar tydligt att det var fel (A)",
+          "Låter det passera – ryktet bleknar ändå (B)",
+          "Tar upp det direkt, sanningen måste fram (C)",
+          "Försöker förstå varför kollegan gjorde det (D)"
+        ]},
+      { q: "6. Någon tränger sig före i kön. Hur agerar du?",
+        options: [
+          "Låter det passera – alla gör misstag (A)",
+          "Blir irriterad men håller tillbaka (B)",
+          "Säger till, regler finns av en anledning (C)",
+          "Tänker: detta är en chans att öva tålamod (D)"
+        ]},
+      { q: "7. Du får ett välbetalt jobberbjudande på ett företag med dåligt rykte. Vad gör du?",
+        options: [
+          "Avstår – pengar är inte värda det (A)",
+          "Tvekar men vet att handlingar binder en vid följder (B)",
+          "Tackar nej – integritet går före karriär (C)",
+          "Väljer bort det – arbete ska bygga upp, inte riva ner (D)"
+        ]},
+      { q: "8. En släkting vill att du deltar i en tradition du själv inte brukar följa. Vad gör du?",
+        options: [
+          "Deltar för att visa respekt (A)",
+          "Förklarar min ståndpunkt men är med socialt (B)",
+          "Avstår om det känns fel, gör det jag brukar (C)",
+          "Visar respekt på mitt eget sätt (D)"
+        ]},
+      { q: "9. Du får en oväntad summa pengar. Vad gör du först?",
+        options: [
+          "Skänker en del till någon som behöver (A)",
+          "Sparar lugnt och planerar (B)",
+          "Delar med familjen – rättvist (C)",
+          "Använder för något bestående, inte nöjen (D)"
+        ]},
+      { q: "10. Du tänker på framtiden. Vad är viktigast för dig?",
+        options: [
+          "Att lämna efter sig handlingar som gör skillnad (A)",
+          "Att leva enkelt och inte fastna i begär (B)",
+          "Att hålla fast vid rättvisa och integritet (C)",
+          "Att följa en väg som gör livet meningsfullt (D)"
+        ]}
+    ];
+
+    let scores, current;
+
+    function initState() {
+      scores = { A: 0, B: 0, C: 0, D: 0 };
+      current = 0;
+      updateCounter();
+      updateProgress();
+    }
+
+    function letterFromOption(opt) {
+      const m = opt.match(/\((.)\)\s*$/);
+      return m ? m[1] : null;
+    }
+
+    function updateCounter() {
+      const el = document.getElementById("counter");
+      el.textContent = `Fråga ${Math.min(current + 1, questions.length)}/${questions.length}`;
+    }
+
+    function updateProgress() {
+      const p = document.getElementById("progress");
+      const pct = Math.round((current / questions.length) * 100);
+      p.style.width = pct + "%";
+    }
+
+    function showQuestion() {
+      if (current >= questions.length) {
+        showResult();
+        return;
+      }
+      const container = document.getElementById("quiz");
+      container.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "question";
+      wrap.innerHTML = `<h3>${questions[current].q}</h3>`;
+      const opts = document.createElement("div");
+      opts.className = "options";
+
+      questions[current].options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.textContent = opt;
+        btn.onclick = () => {
+          const letter = letterFromOption(opt);
+          if (letter && scores[letter] !== undefined) scores[letter]++;
+          current++;
+          updateCounter();
+          updateProgress();
+          showQuestion();
+        };
+        opts.appendChild(btn);
+      });
+
+      wrap.appendChild(opts);
+      container.appendChild(wrap);
+    }
+
+    function showResult() {
+      // Hide quiz card buttons
+      const quiz = document.getElementById("quiz");
+      quiz.innerHTML = `<p class="muted">Klart! Se resultatet nedan.</p>`;
+
+      // Compute percentages
+      const total = Object.values(scores).reduce((a, b) => a + b, 0) || 1;
+      const pct = Object.fromEntries(
+        Object.entries(scores).map(([k, v]) => [k, Math.round((v / total) * 100)])
+      );
+
+      // Top keys (handle ties)
+      const maxVal = Math.max(...Object.values(scores));
+      const topKeys = Object.keys(scores).filter(k => scores[k] === maxVal);
+
+      // Summary line
+      const mapTitle = {
+        A: "kristen etik (medkänsla/förlåtelse)",
+        B: "buddhistiskt präglad balans",
+        C: "regelstyrd/rättviseinriktad (islam/judendom)",
+        D: "livshelhet/”väg”-orienterat (hinduisk prägel)"
+      };
+      const titleList = topKeys.map(k => `${k} – ${mapTitle[k]}`).join(" & ");
+
+      const summary = document.getElementById("summary");
+      summary.textContent = `Du lutar mest åt: ${titleList}`;
+
+      // Distribution bars
+      const dist = document.getElementById("distribution");
+      dist.innerHTML = "";
+      ["A", "B", "C", "D"].forEach(k => {
+        const row = document.createElement("div");
+        row.className = "dist-row";
+        const label = document.createElement("div");
+        label.textContent = k;
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        const fill = document.createElement("span");
+        fill.style.width = pct[k] + "%";
+        bar.appendChild(fill);
+        const val = document.createElement("div");
+        val.textContent = pct[k] + "%";
+        row.appendChild(label);
+        row.appendChild(bar);
+        row.appendChild(val);
+        dist.appendChild(row);
+      });
+
+      // Interpretation text
+      const interp = document.getElementById("interpretation");
+      const texts = {
+        A: "Fokus på medkänsla, förlåtelse och att göra gott för andra i praktiken.",
+        B: "Balans, tålamod och att inte dras med i ilska eller begär – enkelhet före överflöd.",
+        C: "Tydlig känsla för rätt och fel, integritet och respekt för ramar och rättvisa.",
+        D: "Ser livet som en helhetlig väg – handlingar och stillhet vävs ihop över tid."
+      };
+      let lines = topKeys.map(k => `• ${k}: ${texts[k]}`).join("\n");
+      if (topKeys.length > 1) {
+        lines += "\n\nDu visar en blandad profil – flera synsätt väger lika tungt.";
+      }
+      interp.textContent = lines;
+
+      // Show result card
+      document.getElementById("resultCard").style.display = "block";
+
+      // Scroll to result
+      setTimeout(() => {
+        document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+
+    function restart() {
+      initState();
+      document.getElementById("resultCard").style.display = "none";
+      document.getElementById("quiz").innerHTML = "";
+      showQuestion();
+      scrollToTop();
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Init
+    initState();
+    showQuestion();
+  </script>
+</body>
+</html>
 
